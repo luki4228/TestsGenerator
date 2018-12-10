@@ -172,7 +172,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassInfo.cs" />
     <Compile Include="CodeParcer.cs" />
     <Compile Include="Generator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
