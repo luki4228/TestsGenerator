@@ -73,19 +73,16 @@ namespace TestsGenerator
 
         private SyntaxList<UsingDirectiveSyntax> GetUsings()
         {
-            List<UsingDirectiveSyntax> usingDirective = new List<UsingDirectiveSyntax>()
+            var usings = new List<UsingDirectiveSyntax>()
             {
-                UsingDirective(
-                    QualifiedName(
-                        QualifiedName(
-                            QualifiedName(
-                                IdentifierName("Microsoft"),
-                                IdentifierName("VisualStudio")),
-                            IdentifierName("TestTools")),
-                        IdentifierName("UnitTesting")))
+                UsingDirective(IdentifierName("System")),
+                UsingDirective(IdentifierName("System.Collections.Generic")),
+                UsingDirective(IdentifierName("System.Linq")),
+                UsingDirective(IdentifierName("System.Text")),
+                UsingDirective(IdentifierName("Microsoft.VisualStudio.TestTools.UnitTesting")),
             };
 
-            return List(usingDirective);
+            return new SyntaxList<UsingDirectiveSyntax>(usings);
         }
 
         private SyntaxList<MemberDeclarationSyntax> GetMethodsSyntaxList(List<string> methods)

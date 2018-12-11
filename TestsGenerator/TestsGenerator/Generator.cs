@@ -33,7 +33,7 @@ namespace TestsGenerator
             writeOptions.MaxDegreeOfParallelism = maxWriting;
 
             var readBlock = new TransformBlock<string, string>(fileName => Reader.Read(fileName), readOptions);
-            var processBlock = new TransformBlock<string, List<Test>>(sourceCode => codeParcer.GenerateTests(sourceCode), processOptions);
+            var processBlock = new TransformBlock<string, List<Test>>(src => codeParcer.GenerateTests(src), processOptions);
             var writeBlock = new ActionBlock<List<Test>>(output => Writer.Write(outputPath, output).Wait(), writeOptions);
 
             readBlock.LinkTo(processBlock, linkOptions);
