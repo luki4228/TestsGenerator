@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace TestsGenerator
 {
-    class CodeParcer
+    public class CodeParcer
     {
         public List<CInfo> Parce(string src)
         {
