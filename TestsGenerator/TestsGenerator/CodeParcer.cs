@@ -12,100 +12,42 @@ namespace TestsGenerator
 {
     class CodeParcer
     {
-        public List<Test> GenerateTests(string src)
+        public List<CInfo> Parce(string src)
         {
-            string content, fileName;
-            var res = new List<Test>();
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(src);
+            CompilationUnitSyntax compilationUnit = syntaxTree.GetCompilationUnitRoot();
+            return GetClasses(compilationUnit);
+        }
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(src);
-            var compilationUnitSyntax = syntaxTree.GetCompilationUnitRoot();
+        private List<CInfo> GetClasses(CompilationUnitSyntax compilationUnit)
+        {
+            string classNamespace, className;
+            var classes = new List<CInfo>();
 
-            var classes = compilationUnitSyntax.DescendantNodes().OfType<ClassDeclarationSyntax>();
-
-            foreach (var classDeclaration in classes)
+            foreach (ClassDeclarationSyntax classDecl in compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>())
             {
-                var publicMethods = classDeclaration.DescendantNodes().OfType<MethodDeclarationSyntax>()
-                    .Where(x => x.Modifiers.Any(y => y.ValueText == "public"));
-
-                var ns = (classDeclaration.Parent as NamespaceDeclarationSyntax)?.Name.ToString();
-                var className = classDeclaration.Identifier.ValueText;
-                var methodsName = new List<string>();
-                foreach (var method in publicMethods)
-                {
-                    var name = GetMethodName(methodsName, method.Identifier.ToString(), 0);
-                    methodsName.Add(name);
-                }
-
-                NamespaceDeclarationSyntax namespaceDeclarationSyntax = NamespaceDeclaration(QualifiedName(
-                    IdentifierName(ns), IdentifierName("Test")));
-                CompilationUnitSyntax cus = CompilationUnit()
-                    .WithUsings(GetUsings())
-                    .WithMembers(SingletonList<MemberDeclarationSyntax>(namespaceDeclarationSyntax
-                        .WithMembers(SingletonList<MemberDeclarationSyntax>(ClassDeclaration(className + "Tests")
-                            .WithAttributeLists(
-                                SingletonList<AttributeListSyntax>(
-                                    AttributeList(
-                                        SingletonSeparatedList<AttributeSyntax>(
-                                            Attribute(
-                                                IdentifierName("TestClass"))))))
-                                                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                                                        .WithMembers(GetMethodsSyntaxList(methodsName))))));
-
-                    fileName = className + "Test.cs";
-                    content = cus.NormalizeWhitespace().ToFullString();
-                    res.Add(new Test(fileName, content));
+                classNamespace = ((NamespaceDeclarationSyntax)classDecl.Parent).Name.ToString();
+                className = classDecl.Identifier.ValueText;
+                classes.Add(new CInfo(className, classNamespace, GetMethods(classDecl)));
             }
 
-            return res;
+            return classes;
         }
 
-        private string GetMethodName(List<string> methods, string method, int count)
+        private List<string> GetMethods(ClassDeclarationSyntax classDecl)
         {
-            var res = method + (count == 0 ? "" : count.ToString());
+            string methodName;
+            var classMethods = new List<string>();
 
-            if (methods.Contains(res))
+            foreach (MethodDeclarationSyntax methodDecl in classDecl.DescendantNodes().OfType<MethodDeclarationSyntax>()
+                .Where(methodDecl => methodDecl.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PublicKeyword))))
             {
-                return GetMethodName(methods, method, count + 1);
+                methodName = methodDecl.Identifier.ValueText;
+                classMethods.Add(methodName);
             }
 
-            return res;
-        }
-
-        private SyntaxList<UsingDirectiveSyntax> GetUsings()
-        {
-            var usings = new List<UsingDirectiveSyntax>()
-            {
-                UsingDirective(IdentifierName("System")),
-                UsingDirective(IdentifierName("System.Collections.Generic")),
-                UsingDirective(IdentifierName("System.Linq")),
-                UsingDirective(IdentifierName("System.Text")),
-                UsingDirective(IdentifierName("Microsoft.VisualStudio.TestTools.UnitTesting")),
-            };
-
-            return new SyntaxList<UsingDirectiveSyntax>(usings);
-        }
-
-        private SyntaxList<MemberDeclarationSyntax> GetMethodsSyntaxList(List<string> methods)
-        {
-            var result = new List<MemberDeclarationSyntax>();
-            foreach (var method in methods) result.Add(GetMethod(method));
-
-            return List(result);
-        }
-
-        private MethodDeclarationSyntax GetMethod(string name)
-        {
-            return MethodDeclaration(
-                    PredefinedType(Token(SyntaxKind.VoidKeyword)), Identifier(name + "Test"))
-                .WithAttributeLists(SingletonList(AttributeList(SingletonSeparatedList(
-                                Attribute(IdentifierName("TestMethod"))))))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .WithBody(Block(ExpressionStatement(InvocationExpression(
-                    MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                        IdentifierName("Assert"), IdentifierName("Fail")))
-                            .WithArgumentList(ArgumentList(SingletonSeparatedList(
-                                Argument(LiteralExpression(SyntaxKind.StringLiteralExpression,
-                                    Literal("autogenerated")))))))));
+            return classMethods;
         }
     }
+
 }
