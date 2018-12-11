@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace TestsGenerator
 {
-    class Reader
+    public static class Reader
     {
+        public static async Task<string> Read(string filePath)
+        {
+            using (StreamReader strmReader = new StreamReader(filePath))
+            {
+                return await strmReader.ReadToEndAsync();
+            }
+        }
     }
 }

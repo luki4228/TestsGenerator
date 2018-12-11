@@ -8,15 +8,15 @@ namespace TestsGenerator
 {
     public class Generator
     {
-        int readingThreadAmout;
-        int writingThreadAmout;
-        int maxProcessingThreadAmout;
+        int maxReading;
+        int maxWriting;
+        int maxProcessing;
 
-        public Generator(int readingThreadAmout, int writingThreadAmout, int maxProcessingThreadAmout)
+        public Generator(int _maxReading, int _maxWriting, int _maxProcessing)
         {
-            this.readingThreadAmout = readingThreadAmout;
-            this.writingThreadAmout = writingThreadAmout;
-            this.maxProcessingThreadAmout = maxProcessingThreadAmout;
+            maxReading = _maxReading;
+            maxWriting = _maxWriting;
+            maxProcessing = _maxProcessing;
         }
 
         public async Task Generate(List<string> inputFiles, string outputPath)
