@@ -9,16 +9,16 @@ namespace TestsGenerator
 {
     public static class Writer
     {
-        public static async Task Write(string outputPath, List<TestInfo> tests)
+        public static async Task Write(string outputPath, List<Test> tests)
         {
             string path;
             if (!Directory.Exists(outputPath)) Directory.CreateDirectory(outputPath);
             foreach (Test test in tests)
             {
-                path = outputPath + "\\" + test.TestName;
+                path = outputPath + "\\" + test.Name;
                 using (StreamWriter writer = new StreamWriter(path))
                 {
-                    await writer.WriteAsync(test.TestContent);
+                    await writer.WriteAsync(test.Content);
                 }
             }
         }

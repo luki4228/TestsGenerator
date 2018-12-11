@@ -12,7 +12,7 @@ namespace TestsGenerator
 {
     class CodeParcer
     {
-        public List<Test> MakeTemplates(string src)
+        public List<Test> GenerateTests(string src)
         {
             string content, fileName;
             var res = new List<Test>();
